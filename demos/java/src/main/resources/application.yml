@@ -1,0 +1,13 @@
+server:
+  port: 3002
+
+spring:
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 100MB
+      max-request-size: 500MB
+
+leoupload:
+  upload-dir: ./uploads
+  session-ttl-hours: 24

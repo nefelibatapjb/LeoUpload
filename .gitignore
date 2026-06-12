@@ -1,0 +1,24 @@
+node_modules
+dist
+.turbo
+coverage
+*.tsbuildinfo
+.vite
+.cache
+
+# Upload test directories
+uploads/
+demos/*/uploads/
+
+# IDE
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.local

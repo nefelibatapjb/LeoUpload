@@ -1,0 +1,1 @@
+export { HashWorker } from './HashWorker';
