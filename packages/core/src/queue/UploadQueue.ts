@@ -94,6 +94,16 @@ export class UploadQueue {
   }
 
   /**
+   * Reset the queue to idle state for a fresh upload.
+   */
+  reset(): void {
+    this.queue = [];
+    this.inFlight.clear();
+    this.status = 'idle';
+    this.abortController = null;
+  }
+
+  /**
    * Pause the queue. In-flight chunks complete, pending chunks are held.
    */
   pause(): void {

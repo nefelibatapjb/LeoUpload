@@ -165,6 +165,7 @@ export class LeoUpload {
     this.startTime = performance.now();
     this.uploadedChunks.clear();
     this.hashedChunks = [];
+    this.uploadQueue.reset();
 
     this.setState({
       status: 'hashing',
@@ -245,8 +246,11 @@ export class LeoUpload {
         try {
           await Promise.all(uploadPromises);
         } catch (err) {
-          // Individual chunk failures are handled by UploadQueue events
-          // If we get here, a chunk failed fatally
+          // Individual chunk failures are handled by UploadQueue events.
+          // If we get here, a chunk failed fatally — unless the user cancelled.
+          if (this.state_.status === 'cancelled') {
+            throw err;
+          }
           const uploadErr = err as UploadError;
           this.setState({ status: 'error', error: uploadErr });
           this.events.emit('error', uploadErr);
@@ -254,8 +258,14 @@ export class LeoUpload {
         }
       }
 
+      // If user paused during upload, wait for resume before completing
+      await this.checkPauseBeforeComplete();
+
       // Phase 4: Complete upload
       this.setState({ overallProgress: 95 });
+
+      // Guard: if cancelled right at the 95% mark, bail out
+      await this.checkPauseBeforeComplete();
 
       const checksums: Record<number, string> = {};
       for (const chunk of this.hashedChunks) {
@@ -266,6 +276,9 @@ export class LeoUpload {
         uploadId,
         checksums,
       );
+
+      // Guard: user may have paused or cancelled during the complete request
+      await this.checkPauseBeforeComplete();
 
       const durationMs = performance.now() - this.startTime;
 
@@ -510,6 +523,32 @@ export class LeoUpload {
       });
     }
     this.state_.chunkProgress = progress;
+  }
+
+  /**
+   * If the upload is currently paused, wait until resumed.
+   * If cancelled, throw immediately. Otherwise pass through.
+   */
+  private async checkPauseBeforeComplete(): Promise<void> {
+    if (this.state_.status === 'cancelled') {
+      throw new UploadError('Upload cancelled', 'CANCELLED', { retryable: false });
+    }
+    if (this.state_.status !== 'paused') return;
+
+    return new Promise<void>((resolve, reject) => {
+      const check = () => {
+        if (this.state_.status === 'uploading') {
+          resolve();
+        } else if (this.state_.status === 'cancelled') {
+          reject(new UploadError('Upload cancelled', 'CANCELLED', { retryable: false }));
+        } else if (this.state_.status === 'error') {
+          reject(this.state_.error ?? new Error('Upload failed'));
+        } else {
+          setTimeout(check, 100);
+        }
+      };
+      check();
+    });
   }
 
   private async waitForUploadCompletion(): Promise<UploadResult> {

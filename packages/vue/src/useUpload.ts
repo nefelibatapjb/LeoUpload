@@ -29,6 +29,8 @@ export interface UseUploadReturn {
   uploadId: DeepReadonly<Ref<string | null>>;
   /** Per-chunk progress */
   chunks: DeepReadonly<Ref<ChunkProgress[]>>;
+  /** Name of the current file being uploaded */
+  fileName: DeepReadonly<Ref<string>>;
 
   /** Start uploading a file */
   start: (file: File) => Promise<UploadResult>;
@@ -63,9 +65,13 @@ export function useUpload(config: Partial<UploadConfig> = {}): UseUploadReturn {
   const error = ref<UploadError | null>(null);
   const uploadId = ref<string | null>(null);
   const chunks = ref<ChunkProgress[]>([]);
+  const fileName = ref('');
 
   // Wire events to reactive refs
   const unsubProgress = uploader.on('progress', (e) => {
+    if (status.value === 'hashing') {
+      status.value = 'uploading';
+    }
     progress.value = e.overallProgress;
     uploadedBytes.value = e.uploadedBytes;
     totalBytes.value = e.totalBytes;
@@ -77,6 +83,7 @@ export function useUpload(config: Partial<UploadConfig> = {}): UseUploadReturn {
   });
 
   const unsubComplete = uploader.on('complete', () => {
+    progress.value = 100;
     status.value = 'completed';
   });
 
@@ -114,6 +121,7 @@ export function useUpload(config: Partial<UploadConfig> = {}): UseUploadReturn {
   });
 
   const start = async (file: File): Promise<UploadResult> => {
+    fileName.value = file.name;
     status.value = 'hashing';
     try {
       const result = await uploader.start(file);
@@ -149,6 +157,7 @@ export function useUpload(config: Partial<UploadConfig> = {}): UseUploadReturn {
     error: readonly(error),
     uploadId: readonly(uploadId),
     chunks: readonly(chunks),
+    fileName: readonly(fileName),
     start,
     pause,
     resume,

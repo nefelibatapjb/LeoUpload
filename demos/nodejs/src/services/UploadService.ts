@@ -162,6 +162,12 @@ export class UploadService {
       throw new Error('Upload session not found');
     }
 
+    // If the user already cancelled, refuse to merge
+    if (session.status === 'cancelled') {
+      await this.store.cleanup(uploadId);
+      throw new Error('Upload has been cancelled');
+    }
+
     const uploadedChunks = await this.store.getUploadedChunks(uploadId);
 
     // Validate all chunks are present
@@ -209,6 +215,13 @@ export class UploadService {
     const session = this.sessions.get(uploadId);
     if (session) {
       session.status = 'cancelled';
+      // Also delete the merged output file if it was already created
+      const outputPath = path.join('uploads', session.fileName);
+      try {
+        await fs.unlink(outputPath);
+      } catch {
+        // File may not exist yet — that's fine
+      }
     }
     await this.store.cleanup(uploadId);
   }

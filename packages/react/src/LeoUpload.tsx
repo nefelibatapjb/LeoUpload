@@ -10,6 +10,7 @@ export interface LeoUploadChildrenProps {
   error: UploadError | null;
   uploadId: string | null;
   chunks: ChunkProgress[];
+  fileName: string;
   start: (file: File) => Promise<unknown>;
   pause: () => void;
   resume: () => Promise<unknown>;
@@ -53,6 +54,7 @@ export function LeoUpload({ config, children, className }: LeoUploadProps): Reac
     error,
     uploadId,
     chunks,
+    fileName,
     start,
     pause,
     resume,
@@ -62,6 +64,9 @@ export function LeoUpload({ config, children, className }: LeoUploadProps): Reac
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const selectFile = useCallback(() => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
     fileInputRef.current?.click();
   }, []);
 
@@ -86,16 +91,22 @@ export function LeoUpload({ config, children, className }: LeoUploadProps): Reac
     idle: 'Ready',
     hashing: 'Hashing file...',
     uploading: `Uploading ${progress}%`,
-    paused: 'Paused',
-    completed: 'Complete!',
-    cancelled: 'Cancelled',
-    error: 'Error',
+    paused: fileName ? `Paused — ${fileName}` : 'Paused',
+    completed: fileName ? `Complete — ${fileName}` : 'Complete!',
+    cancelled: fileName ? `Cancelled — ${fileName}` : 'Cancelled',
+    error: fileName ? `Error — ${fileName}` : 'Error',
   };
 
   // Render props pattern
   if (children) {
     return (
       <>
+        <input
+          ref={fileInputRef}
+          type="file"
+          style={{ display: 'none' }}
+          onChange={handleFileChange}
+        />
         {children({
           status,
           progress,
@@ -104,6 +115,7 @@ export function LeoUpload({ config, children, className }: LeoUploadProps): Reac
           error,
           uploadId,
           chunks,
+          fileName,
           start,
           pause,
           resume,

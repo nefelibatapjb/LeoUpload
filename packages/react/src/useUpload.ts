@@ -24,6 +24,9 @@ export interface UseUploadReturn {
   /** Per-chunk progress */
   chunks: ChunkProgress[];
 
+  /** Name of the current file being uploaded */
+  fileName: string;
+
   /** Start uploading a file */
   start: (file: File) => Promise<UploadResult>;
   /** Pause the upload */
@@ -67,6 +70,7 @@ export function useUpload(config: Partial<UploadConfig> = {}): UseUploadReturn {
 
   // Reactive state
   const [status, setStatus] = useState<UploadState['status']>('idle');
+  const [fileName, setFileName] = useState('');
   const [progress, setProgress] = useState(0);
   const [uploadedBytes, setUploadedBytes] = useState(0);
   const [totalBytes, setTotalBytes] = useState(0);
@@ -85,6 +89,7 @@ export function useUpload(config: Partial<UploadConfig> = {}): UseUploadReturn {
   // Wire events
   useEffect(() => {
     const unsubProgress = uploader.on('progress', (e) => {
+      setStatus((prev) => (prev === 'hashing' ? 'uploading' : prev));
       setProgress(e.overallProgress);
       setUploadedBytes(e.uploadedBytes);
       setTotalBytes(e.totalBytes);
@@ -96,6 +101,7 @@ export function useUpload(config: Partial<UploadConfig> = {}): UseUploadReturn {
     });
 
     const unsubComplete = uploader.on('complete', () => {
+      setProgress(100);
       setStatus('completed');
       syncState();
     });
@@ -127,6 +133,7 @@ export function useUpload(config: Partial<UploadConfig> = {}): UseUploadReturn {
 
   const start = useCallback(
     async (file: File): Promise<UploadResult> => {
+      setFileName(file.name);
       setStatus('hashing');
       setError(null);
       try {
@@ -165,6 +172,7 @@ export function useUpload(config: Partial<UploadConfig> = {}): UseUploadReturn {
     error,
     uploadId,
     chunks,
+    fileName,
     start,
     pause,
     resume,

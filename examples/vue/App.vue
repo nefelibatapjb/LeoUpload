@@ -3,21 +3,23 @@
     <h1>LeoUpload Vue 3 Demo</h1>
     <p class="subtitle">支持断点续传、断开重连、大文件分片上传</p>
 
-    <LeoUpload :config="uploadConfig" v-slot="{ status, progress, start, pause, resume, cancel, selectFile }">
+    <LeoUpload :config="uploadConfig" v-slot="{ status, progress, fileName, start, pause, resume, cancel, selectFile }">
       <div class="upload-demo">
         <div
           class="upload-zone"
+          :class="{ 'drag-over': dragOver }"
           @click="selectFile"
-          @dragover.prevent
-          @drop.prevent="(e) => start(e.dataTransfer.files[0])"
+          @dragover.prevent="dragOver = true"
+          @dragleave.prevent="dragOver = false"
+          @drop.prevent="(e) => { dragOver = false; start(e.dataTransfer.files[0]); }"
         >
           <p>📁 点击选择文件或拖拽到此处</p>
           <p style="font-size:0.8rem;color:#999">支持大文件，自动分片上传</p>
         </div>
 
         <div v-if="status !== 'idle'" class="info">
-          <progress :value="progress" max="100" />
-          <span class="status">{{ statusText(status, progress) }}</span>
+          <ProgressBar :value="progress" :max="100" />
+          <span class="status">{{ statusText(status, progress, fileName) }}</span>
           <div class="actions">
             <button
               class="btn-primary"
@@ -53,11 +55,13 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { LeoUpload } from '@leoupload/vue';
+import LeoUpload from '@leoupload/vue/LeoUpload.vue';
+import ProgressBar from '@leoupload/vue/ProgressBar.vue';
 
 const chunkSizeMB = ref(5);
 const concurrency = ref(3);
 const serverPort = ref(3000);
+const dragOver = ref(false);
 
 const uploadConfig = computed(() => ({
   chunkSize: chunkSizeMB.value * 1024 * 1024,
@@ -72,15 +76,15 @@ const uploadConfig = computed(() => ({
   },
 }));
 
-function statusText(status: string, progress: number): string {
+function statusText(status: string, progress: number, fileName?: string): string {
   const map: Record<string, string> = {
     idle: '准备就绪',
     hashing: '正在计算文件哈希...',
     uploading: `上传中: ${progress}%`,
-    paused: '已暂停',
-    completed: '上传完成!',
-    cancelled: '已取消',
-    error: '上传出错',
+    paused: fileName ? `已暂停 — ${fileName}` : '已暂停',
+    completed: fileName ? `上传完成 — ${fileName}` : '上传完成!',
+    cancelled: fileName ? `已取消 — ${fileName}` : '已取消',
+    error: fileName ? `上传出错 — ${fileName}` : '上传出错',
   };
   return map[status] || status;
 }
@@ -98,9 +102,9 @@ h1 { font-size: 1.5rem; }
   cursor: pointer;
   transition: border-color 0.2s;
 }
-.upload-zone:hover { border-color: #4a90d9; }
+.upload-zone:hover { border-color: #4a90d9; background: #eff6ff; }
+.upload-zone.drag-over { border-color: #34d399; background: #ecfdf5; }
 .info { margin-top: 1rem; }
-progress { width: 100%; height: 10px; border-radius: 5px; }
 .status { display: block; margin-top: 0.5rem; font-size: 0.9rem; color: #666; }
 .actions { margin-top: 0.75rem; display: flex; gap: 0.5rem; }
 .actions button {

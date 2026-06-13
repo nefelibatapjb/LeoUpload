@@ -11,9 +11,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
-    }
+    },
+    "./LeoUpload.vue": "./src/LeoUpload.vue",
+    "./ProgressBar.vue": "./src/ProgressBar.vue"
   },
-  "files": ["dist", "src/LeoUpload.vue"],
+  "files": ["dist", "src/LeoUpload.vue", "src/ProgressBar.vue"],
   "sideEffects": false,
   "scripts": {
     "build": "tsup",

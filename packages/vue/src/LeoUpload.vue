@@ -1,18 +1,7 @@
 <template>
-  <slot
-    :status="status"
-    :progress="progress"
-    :uploaded-bytes="uploadedBytes"
-    :total-bytes="totalBytes"
-    :error="error"
-    :upload-id="uploadId"
-    :chunks="chunks"
-    :start="start"
-    :pause="pause"
-    :resume="resume"
-    :cancel="cancel"
-    :select-file="selectFile"
-  >
+  <slot :status="status" :progress="progress" :uploaded-bytes="uploadedBytes" :total-bytes="totalBytes" :error="error"
+    :upload-id="uploadId" :chunks="chunks" :start="start" :pause="pause" :resume="resume" :cancel="cancel"
+    :select-file="selectFile" :file-name="fileName">
     <!-- Default UI when no slot provided -->
     <div v-if="!$slots.default" class="leoupload">
       <div class="leoupload__zone" @click="selectFile" @dragover.prevent @drop.prevent="onDrop">
@@ -21,7 +10,7 @@
         </slot>
       </div>
       <div v-if="status !== 'idle'" class="leoupload__info">
-        <progress :value="progress" max="100" class="leoupload__progress" />
+        <ProgressBar :value="progress" :max="100" />
         <span class="leoupload__status">{{ statusText }}</span>
         <div class="leoupload__actions">
           <button v-if="status === 'uploading'" @click="pause">Pause</button>
@@ -38,6 +27,7 @@
 import { computed, ref } from 'vue';
 import type { UploadConfig } from '@leoupload/core';
 import { useUpload } from './useUpload';
+import ProgressBar from './ProgressBar.vue';
 
 const props = withDefaults(
   defineProps<{
@@ -54,6 +44,7 @@ const {
   error,
   uploadId,
   chunks,
+  fileName,
   start,
   pause,
   resume,
@@ -67,10 +58,10 @@ const statusText = computed(() => {
     idle: 'Ready',
     hashing: 'Hashing file...',
     uploading: `Uploading ${progress}%`,
-    paused: 'Paused',
-    completed: 'Complete!',
-    cancelled: 'Cancelled',
-    error: 'Error',
+    paused: fileName.value ? `Paused — ${fileName.value}` : 'Paused',
+    completed: fileName.value ? `Complete — ${fileName.value}` : 'Complete!',
+    cancelled: fileName.value ? `Cancelled — ${fileName.value}` : 'Cancelled',
+    error: fileName.value ? `Error — ${fileName.value}` : 'Error',
   };
   return map[status] || status;
 });
@@ -87,6 +78,8 @@ function selectFile(): void {
     document.body.appendChild(input);
     fileInput.value = input;
   }
+  // Reset value so the change event fires even for the same file
+  fileInput.value.value = '';
   fileInput.value.click();
 }
 
@@ -100,6 +93,7 @@ function onDrop(e: DragEvent): void {
 .leoupload {
   font-family: system-ui, sans-serif;
 }
+
 .leoupload__zone {
   border: 2px dashed #ccc;
   border-radius: 8px;
@@ -108,9 +102,11 @@ function onDrop(e: DragEvent): void {
   cursor: pointer;
   transition: border-color 0.2s;
 }
+
 .leoupload__zone:hover {
   border-color: #4a90d9;
 }
+
 .leoupload__btn {
   background: #4a90d9;
   color: #fff;
@@ -120,25 +116,24 @@ function onDrop(e: DragEvent): void {
   font-size: 1rem;
   cursor: pointer;
 }
+
 .leoupload__info {
   margin-top: 1rem;
 }
-.leoupload__progress {
-  width: 100%;
-  height: 8px;
-  border-radius: 4px;
-}
+
 .leoupload__status {
   display: block;
   margin-top: 0.5rem;
   font-size: 0.875rem;
   color: #666;
 }
+
 .leoupload__actions {
   margin-top: 0.5rem;
   display: flex;
   gap: 0.5rem;
 }
+
 .leoupload__actions button {
   padding: 0.4rem 1rem;
   border: 1px solid #ccc;
@@ -147,6 +142,7 @@ function onDrop(e: DragEvent): void {
   cursor: pointer;
   font-size: 0.875rem;
 }
+
 .leoupload__error {
   margin-top: 0.5rem;
   color: #d32f2f;

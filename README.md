@@ -49,35 +49,135 @@ await uploader.start(file);
 
 #### Vue 3
 
+Two ways to use:
+
+**Option A — `<LeoUpload>` component with scoped slots (recommended):**
+
+```vue
+<script setup>
+import LeoUpload from '@leoupload/vue/LeoUpload.vue';
+import ProgressBar from '@leoupload/vue/ProgressBar.vue';
+
+const config = {
+  chunkSize: 5 * 1024 * 1024,
+  concurrency: 3,
+  server: {
+    init: '/api/upload/init',
+    chunk: '/api/upload/chunk',
+    progress: '/api/upload/progress',
+    complete: '/api/upload/complete',
+    cancel: '/api/upload',
+  },
+};
+</script>
+
+<template>
+  <LeoUpload :config="config" v-slot="{ status, progress, fileName, start, pause, resume, cancel, selectFile }">
+    <div class="drop-zone" @click="selectFile" @dragover.prevent @drop.prevent="(e) => start(e.dataTransfer.files[0])">
+      <p>📁 Click or drag a file here</p>
+    </div>
+
+    <div v-if="status !== 'idle'">
+      <ProgressBar :value="progress" :max="100" />
+      <span>{{ fileName }}</span>
+      <button v-if="status === 'uploading'" @click="pause">Pause</button>
+      <button v-if="status === 'paused'" @click="resume">Resume</button>
+      <button v-if="status === 'uploading' || status === 'paused'" @click="cancel">Cancel</button>
+    </div>
+  </LeoUpload>
+</template>
+```
+
+**Option B — `useUpload` composable for full control:**
+
 ```vue
 <script setup>
 import { useUpload } from '@leoupload/vue';
 
-const { status, progress, start, pause, resume } = useUpload({
+const { status, progress, fileName, start, pause, resume, cancel, selectFile } = useUpload({
   server: { /* ... */ },
 });
 </script>
 
 <template>
+  <input type="file" @change="(e) => start((e.target as HTMLInputElement).files?.[0]!)" />
   <progress :value="progress" max="100" />
   <button @click="pause" v-if="status === 'uploading'">Pause</button>
+  <button @click="resume" v-if="status === 'paused'">Resume</button>
 </template>
 ```
 
 #### React
 
+Two ways to use:
+
+**Option A — `<LeoUpload>` component with render props (recommended):**
+
+```tsx
+import { LeoUpload } from '@leoupload/react';
+import type { UploadConfig } from '@leoupload/core';
+
+const config: Partial<UploadConfig> = {
+  chunkSize: 5 * 1024 * 1024,
+  concurrency: 3,
+  server: {
+    init: '/api/upload/init',
+    chunk: '/api/upload/chunk',
+    progress: '/api/upload/progress',
+    complete: '/api/upload/complete',
+    cancel: '/api/upload',
+  },
+};
+
+function App() {
+  return (
+    <LeoUpload config={config}>
+      {({ status, progress, fileName, start, pause, resume, cancel, selectFile }) => (
+        <div>
+          <div
+            onClick={selectFile}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => { e.preventDefault(); start(e.dataTransfer.files[0]); }}
+            style={{ border: '2px dashed #ccc', padding: '2rem', cursor: 'pointer' }}
+          >
+            <p>📁 Click or drag a file here</p>
+          </div>
+
+          {status !== 'idle' && (
+            <div>
+              <div style={{ width: `${progress}%`, height: 8, background: '#4a90d9', borderRadius: 4 }} />
+              <span>{fileName}</span>
+              {status === 'uploading' && <button onClick={pause}>Pause</button>}
+              {status === 'paused' && <button onClick={resume}>Resume</button>}
+              {(status === 'uploading' || status === 'paused') && <button onClick={cancel}>Cancel</button>}
+            </div>
+          )}
+        </div>
+      )}
+    </LeoUpload>
+  );
+}
+```
+
+**Option B — `useUpload` hook for full control:**
+
 ```tsx
 import { useUpload } from '@leoupload/react';
 
 function Uploader() {
-  const { status, progress, start, pause } = useUpload({
+  const { status, progress, fileName, start, pause, resume, cancel, selectFile } = useUpload({
     server: { /* ... */ },
   });
 
   return (
     <div>
+      <div onClick={selectFile} onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => { e.preventDefault(); start(e.dataTransfer.files[0]); }}>
+        Drop file here
+      </div>
       <progress value={progress} max={100} />
       {status === 'uploading' && <button onClick={pause}>Pause</button>}
+      {status === 'paused' && <button onClick={resume}>Resume</button>}
     </div>
   );
 }
@@ -177,16 +277,58 @@ await uploader.start(file);
 
 #### Vue 3
 
+两种用法：
+
+**方式 A — `<LeoUpload>` 组件 + 插槽（推荐）：**
+
+```vue
+<script setup>
+import LeoUpload from '@leoupload/vue/LeoUpload.vue';
+import ProgressBar from '@leoupload/vue/ProgressBar.vue';
+
+const config = {
+  chunkSize: 5 * 1024 * 1024,
+  concurrency: 3,
+  server: {
+    init: '/api/upload/init',
+    chunk: '/api/upload/chunk',
+    progress: '/api/upload/progress',
+    complete: '/api/upload/complete',
+    cancel: '/api/upload',
+  },
+};
+</script>
+
+<template>
+  <LeoUpload :config="config" v-slot="{ status, progress, fileName, start, pause, resume, cancel, selectFile }">
+    <div class="drop-zone" @click="selectFile" @dragover.prevent @drop.prevent="(e) => start(e.dataTransfer.files[0])">
+      <p>📁 点击选择文件或拖拽到此处</p>
+    </div>
+
+    <div v-if="status !== 'idle'">
+      <ProgressBar :value="progress" :max="100" />
+      <span>{{ fileName }}</span>
+      <button v-if="status === 'uploading'" @click="pause">暂停</button>
+      <button v-if="status === 'paused'" @click="resume">继续</button>
+      <button v-if="status === 'uploading' || status === 'paused'" @click="cancel">取消</button>
+    </div>
+  </LeoUpload>
+</template>
+```
+
+**方式 B — `useUpload` Composable 完全自定义：**
+
 ```vue
 <script setup>
 import { useUpload } from '@leoupload/vue';
 
-const { status, progress, start, pause, resume } = useUpload({
+const { status, progress, fileName, start, pause, resume, cancel, selectFile } = useUpload({
   server: { /* ... */ },
 });
 </script>
 
 <template>
+  <input type="file" @change="(e) => start((e.target as HTMLInputElement).files?.[0]!)" />
   <progress :value="progress" max="100" />
   <button @click="pause" v-if="status === 'uploading'">暂停</button>
   <button @click="resume" v-if="status === 'paused'">继续</button>
@@ -195,16 +337,72 @@ const { status, progress, start, pause, resume } = useUpload({
 
 #### React
 
+两种用法：
+
+**方式 A — `<LeoUpload>` 组件 Render Props（推荐）：**
+
+```tsx
+import { LeoUpload } from '@leoupload/react';
+import type { UploadConfig } from '@leoupload/core';
+
+const config: Partial<UploadConfig> = {
+  chunkSize: 5 * 1024 * 1024,
+  concurrency: 3,
+  server: {
+    init: '/api/upload/init',
+    chunk: '/api/upload/chunk',
+    progress: '/api/upload/progress',
+    complete: '/api/upload/complete',
+    cancel: '/api/upload',
+  },
+};
+
+function App() {
+  return (
+    <LeoUpload config={config}>
+      {({ status, progress, fileName, start, pause, resume, cancel, selectFile }) => (
+        <div>
+          <div
+            onClick={selectFile}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => { e.preventDefault(); start(e.dataTransfer.files[0]); }}
+            style={{ border: '2px dashed #ccc', padding: '2rem', cursor: 'pointer' }}
+          >
+            <p>📁 点击选择文件或拖拽到此处</p>
+          </div>
+
+          {status !== 'idle' && (
+            <div>
+              <div style={{ width: `${progress}%`, height: 8, background: '#4a90d9', borderRadius: 4 }} />
+              <span>{fileName}</span>
+              {status === 'uploading' && <button onClick={pause}>暂停</button>}
+              {status === 'paused' && <button onClick={resume}>继续</button>}
+              {(status === 'uploading' || status === 'paused') && <button onClick={cancel}>取消</button>}
+            </div>
+          )}
+        </div>
+      )}
+    </LeoUpload>
+  );
+}
+```
+
+**方式 B — `useUpload` Hook 完全自定义：**
+
 ```tsx
 import { useUpload } from '@leoupload/react';
 
 function Uploader() {
-  const { status, progress, start, pause, resume } = useUpload({
+  const { status, progress, fileName, start, pause, resume, cancel, selectFile } = useUpload({
     server: { /* ... */ },
   });
 
   return (
     <div>
+      <div onClick={selectFile} onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => { e.preventDefault(); start(e.dataTransfer.files[0]); }}>
+        拖拽文件到此处
+      </div>
       <progress value={progress} max={100} />
       {status === 'uploading' && <button onClick={pause}>暂停</button>}
       {status === 'paused' && <button onClick={resume}>继续</button>}
