@@ -29,6 +29,11 @@ export interface UploadConfig {
   metadata?: Record<string, string>;
   /** Automatically start uploading. Default: true */
   autoStart?: boolean;
+  /**
+   * Listen to browser online/offline events: pause automatically when the
+   * network drops and resume automatically when it comes back. Default: true
+   */
+  autoResumeOnReconnect: boolean;
 }
 
 export interface ServerEndpoints {
@@ -90,6 +95,10 @@ export interface UploadEventMap {
   complete: UploadResult;
   error: UploadError;
   cancel: void;
+  /** The browser reports the network went offline (window 'offline') */
+  offline: void;
+  /** The browser reports the network is back (window 'online') */
+  online: void;
 }
 
 export interface ProgressEvent {
@@ -270,6 +279,7 @@ export const DEFAULT_CONFIG: UploadConfig = {
   persistEnabled: true,
   chunkTimeout: 120000,
   autoStart: true,
+  autoResumeOnReconnect: true,
   server: {
     init: '/api/upload/init',
     chunk: '/api/upload/chunk',

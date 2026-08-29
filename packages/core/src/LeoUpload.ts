@@ -66,6 +66,27 @@ export class LeoUpload {
   private hashedChunks: HashedChunk[] = [];
   private startTime = 0;
   private uploadedChunks = new Set<number>();
+  private autoPausedByOffline = false;
+
+  // ---- Network listeners (bound so they can be removed in destroy) ----
+  private handleOffline = (): void => {
+    if (this.state_.status !== 'uploading') return;
+
+    this.autoPausedByOffline = true;
+    this.pause();
+    this.events.emit('offline', undefined);
+  };
+
+  private handleOnline = (): void => {
+    const wasAutoPaused = this.autoPausedByOffline;
+    this.autoPausedByOffline = false;
+    this.events.emit('online', undefined);
+
+    if (wasAutoPaused && this.state_.status === 'paused') {
+      // Errors surface through the 'error' event, not the ignored promise
+      this.resume().catch(() => {});
+    }
+  };
 
   // ---- Static defaults ----
   static defaults: Partial<UploadConfig> = {};
@@ -102,6 +123,12 @@ export class LeoUpload {
 
     // Wire up queue events
     this.wireQueueEvents();
+
+    // Network state awareness (browser only)
+    if (this.config.autoResumeOnReconnect && typeof window !== 'undefined') {
+      window.addEventListener('offline', this.handleOffline);
+      window.addEventListener('online', this.handleOnline);
+    }
 
     // Initial state
     this.state_ = {
@@ -387,6 +414,11 @@ export class LeoUpload {
    * Release all resources. No further operations are allowed.
    */
   destroy(): void {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('offline', this.handleOffline);
+      window.removeEventListener('online', this.handleOnline);
+    }
+
     if (this.state_.status === 'uploading' || this.state_.status === 'paused') {
       this.pause();
       this.persistState();
