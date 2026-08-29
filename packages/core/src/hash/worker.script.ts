@@ -51,15 +51,17 @@ self.onmessage = async (e: MessageEvent<HashRequestMessage>) => {
     results.push({ index: chunk.index, hash });
 
     // Report progress
-    self.postMessage({
+    const progress: HashProgressMessage = {
       type: 'HASH_PROGRESS',
       completed: i + 1,
       total,
-    });
+    };
+    self.postMessage(progress);
   }
 
-  self.postMessage({
+  const response: HashResponseMessage = {
     type: 'HASH_RESULT',
     results,
-  });
+  };
+  self.postMessage(response);
 };

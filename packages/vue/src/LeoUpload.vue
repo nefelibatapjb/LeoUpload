@@ -25,7 +25,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import type { UploadConfig } from '@leoupload/core';
+import type { UploadConfig, UploadState } from '@leoupload/core';
 import { useUpload } from './useUpload';
 import ProgressBar from './ProgressBar.vue';
 
@@ -54,16 +54,16 @@ const {
 const fileInput = ref<HTMLInputElement | null>(null);
 
 const statusText = computed(() => {
-  const map: Record<string, string> = {
+  const map: Record<UploadState['status'], string> = {
     idle: 'Ready',
     hashing: 'Hashing file...',
-    uploading: `Uploading ${progress}%`,
+    uploading: `Uploading ${progress.value}%`,
     paused: fileName.value ? `Paused — ${fileName.value}` : 'Paused',
     completed: fileName.value ? `Complete — ${fileName.value}` : 'Complete!',
     cancelled: fileName.value ? `Cancelled — ${fileName.value}` : 'Cancelled',
     error: fileName.value ? `Error — ${fileName.value}` : 'Error',
   };
-  return map[status] || status;
+  return map[status.value] || status.value;
 });
 
 function selectFile(): void {
