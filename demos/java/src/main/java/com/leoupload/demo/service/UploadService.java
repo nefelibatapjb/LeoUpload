@@ -117,6 +117,12 @@ public class UploadService {
             throw new IllegalArgumentException("Upload session not found");
         }
 
+        // If the user already cancelled, refuse to merge
+        if ("cancelled".equals(session.getStatus())) {
+            storage.cleanup(uploadId);
+            throw new IllegalStateException("Upload has been cancelled");
+        }
+
         List<Integer> uploadedChunks = storage.getUploadedChunks(uploadId);
         if (uploadedChunks.size() != session.getTotalChunks()) {
             throw new IllegalStateException(
@@ -156,6 +162,12 @@ public class UploadService {
         UploadSession session = sessions.get(uploadId);
         if (session != null) {
             session.setStatus("cancelled");
+            // Also delete the merged output file if it was already created
+            try {
+                java.nio.file.Files.deleteIfExists(java.nio.file.Path.of("uploads", session.getFileName()));
+            } catch (IOException e) {
+                // Best effort — file may not exist
+            }
         }
         storage.cleanup(uploadId);
     }

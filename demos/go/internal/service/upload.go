@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"log"
+	"os"
 	"sync"
 	"time"
 
@@ -221,6 +222,12 @@ func (s *UploadService) CompleteUpload(uploadId string, checksums map[int]string
 		return nil, fmt.Errorf("upload session not found")
 	}
 
+	// If the user already cancelled, refuse to merge
+	if sess.status == "cancelled" {
+		s.store.Cleanup(uploadId)
+		return nil, fmt.Errorf("upload has been cancelled")
+	}
+
 	chunks, err := s.store.GetUploadedChunks(uploadId)
 	if err != nil || len(chunks) != sess.totalChunks {
 		return nil, fmt.Errorf("not all chunks uploaded: %d/%d", len(chunks), sess.totalChunks)
@@ -253,8 +260,12 @@ func (s *UploadService) CompleteUpload(uploadId string, checksums map[int]string
 
 func (s *UploadService) CancelUpload(uploadId string) {
 	s.mu.Lock()
-	if sess, ok := s.sessions[uploadId]; ok {
+	sess, ok := s.sessions[uploadId]
+	if ok {
 		sess.status = "cancelled"
+		// Also delete the merged output file if it was already created
+		outputPath := fmt.Sprintf("uploads/%s", sess.fileName)
+		os.Remove(outputPath) // Best effort — file may not exist yet
 	}
 	s.mu.Unlock()
 	s.store.Cleanup(uploadId)

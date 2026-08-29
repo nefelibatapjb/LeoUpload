@@ -4,7 +4,9 @@
  */
 export function assert(condition: unknown, message: string): asserts condition {
   if (!condition) {
-    if (import.meta.env.DEV || typeof process !== 'undefined') {
+    // Vite-style env (guarded — import.meta.env is not typed in all builds)
+    const isDev = (import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV;
+    if (isDev || typeof process !== 'undefined') {
       throw new Error(`[LeoUpload] ${message}`);
     }
     console.warn(`[LeoUpload] ${message}`);

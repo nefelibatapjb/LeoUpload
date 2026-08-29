@@ -1,6 +1,6 @@
 export { useUpload } from './useUpload';
 export type { UseUploadReturn } from './useUpload';
 
-// The LeoUpload.vue component is available at:
+// Components are shipped as source .vue files for Vue SFC tooling:
 //   import LeoUpload from '@leoupload/vue/LeoUpload.vue'
-// It's shipped as source for Vue SFC tooling to handle.
+//   import ProgressBar from '@leoupload/vue/ProgressBar.vue'

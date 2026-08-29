@@ -1,6 +1,6 @@
 {
   "name": "leoupload-monorepo",
-  "version": "0.0.0",
+  "version": "0.1.2",
   "private": true,
   "description": "High-performance file upload library with breakpoint resume, chunked uploads, and framework-agnostic design",
   "scripts": {
