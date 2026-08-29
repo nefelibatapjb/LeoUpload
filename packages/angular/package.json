@@ -1,6 +1,6 @@
 {
   "name": "@leoupload/angular",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Angular wrapper for LeoUpload — signals-based service and standalone component",
   "type": "module",
   "main": "./dist/index.js",

@@ -1,6 +1,6 @@
 {
   "name": "@leoupload/core",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "High-performance file upload engine with breakpoint resume and chunked uploads",
   "type": "module",
   "main": "./dist/index.cjs",

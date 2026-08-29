@@ -1,6 +1,6 @@
 {
   "name": "@leoupload/svelte",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Svelte wrapper for LeoUpload — store-based composable and component",
   "type": "module",
   "main": "./dist/index.js",
