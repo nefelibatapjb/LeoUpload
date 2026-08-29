@@ -22,3 +22,12 @@ Thumbs.db
 # Env
 .env
 .env.local
+.env.*
+
+# Keys & credentials (never commit)
+*.pem
+*.key
+*.p12
+*.pfx
+*_authToken*
+.credentials/
