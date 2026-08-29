@@ -274,14 +274,8 @@ export class LeoUpload {
           await Promise.all(uploadPromises);
         } catch (err) {
           // Individual chunk failures are handled by UploadQueue events.
-          // If we get here, a chunk failed fatally — unless the user cancelled.
-          if (this.state_.status === 'cancelled') {
-            throw err;
-          }
-          const uploadErr = err as UploadError;
-          this.setState({ status: 'error', error: uploadErr });
-          this.events.emit('error', uploadErr);
-          throw uploadErr;
+          // Rethrow — the outer catch sets the error state and emits once.
+          throw err;
         }
       }
 
