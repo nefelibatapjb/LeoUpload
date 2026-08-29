@@ -1,0 +1,56 @@
+{
+  "name": "@leoupload/angular",
+  "version": "0.1.2",
+  "description": "Angular wrapper for LeoUpload — signals-based service and standalone component",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "ngc -p tsconfig.json",
+    "dev": "ngc -p tsconfig.json --watch",
+    "typecheck": "ngc -p tsconfig.json --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {
+    "@angular/common": ">=16.0.0",
+    "@angular/core": ">=16.0.0",
+    "@leoupload/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@angular/common": "^17.3.0",
+    "@angular/compiler": "^17.3.0",
+    "@angular/compiler-cli": "^17.3.0",
+    "@angular/core": "^17.3.0",
+    "@leoupload/core": "workspace:*",
+    "rxjs": "^7.8.0",
+    "typescript": "~5.4.5",
+    "zone.js": "^0.14.0"
+  },
+  "keywords": [
+    "upload",
+    "angular",
+    "file-upload",
+    "leoupload"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nefelibatapjb/LeoUpload.git"
+  },
+  "homepage": "https://github.com/nefelibatapjb/LeoUpload#readme",
+  "bugs": {
+    "url": "https://github.com/nefelibatapjb/LeoUpload/issues"
+  }
+}
