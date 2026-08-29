@@ -1,0 +1,53 @@
+{
+  "name": "@leoupload/svelte",
+  "version": "0.1.2",
+  "description": "Svelte wrapper for LeoUpload — store-based composable and component",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./LeoUpload.svelte": "./src/LeoUpload.svelte"
+  },
+  "files": [
+    "dist",
+    "src/LeoUpload.svelte",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {
+    "@leoupload/core": "workspace:*",
+    "svelte": ">=4.0.0"
+  },
+  "devDependencies": {
+    "@leoupload/core": "workspace:*",
+    "svelte": "^4.2.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.6.0"
+  },
+  "keywords": [
+    "upload",
+    "svelte",
+    "file-upload",
+    "leoupload"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nefelibatapjb/LeoUpload.git"
+  },
+  "homepage": "https://github.com/nefelibatapjb/LeoUpload#readme",
+  "bugs": {
+    "url": "https://github.com/nefelibatapjb/LeoUpload/issues"
+  }
+}
