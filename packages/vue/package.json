@@ -1,6 +1,6 @@
 {
   "name": "@leoupload/vue",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Vue 3 wrapper for LeoUpload — composable and component",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -15,7 +15,12 @@
     "./LeoUpload.vue": "./src/LeoUpload.vue",
     "./ProgressBar.vue": "./src/ProgressBar.vue"
   },
-  "files": ["dist", "src/LeoUpload.vue", "src/ProgressBar.vue"],
+  "files": [
+    "dist",
+    "src/LeoUpload.vue",
+    "src/ProgressBar.vue",
+    "README.md"
+  ],
   "sideEffects": false,
   "scripts": {
     "build": "tsup",
@@ -33,6 +38,19 @@
     "typescript": "^5.6.0",
     "vue": "^3.5.0"
   },
-  "keywords": ["upload", "vue", "file-upload", "leoupload"],
-  "license": "MIT"
+  "keywords": [
+    "upload",
+    "vue",
+    "file-upload",
+    "leoupload"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nefelibatapjb/LeoUpload.git"
+  },
+  "homepage": "https://github.com/nefelibatapjb/LeoUpload#readme",
+  "bugs": {
+    "url": "https://github.com/nefelibatapjb/LeoUpload/issues"
+  }
 }
