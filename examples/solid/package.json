@@ -1,0 +1,19 @@
+{
+  "name": "leoupload-solid-example",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@leoupload/core": "workspace:*",
+    "@leoupload/solid": "workspace:*",
+    "solid-js": "^1.8.0"
+  },
+  "devDependencies": {
+    "vite": "^5.4.0",
+    "vite-plugin-solid": "^2.10.0"
+  }
+}
